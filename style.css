@@ -1,11 +1,10 @@
 :root {
-    --bg-color: #121212;
-    --container-bg: #121212; /* Match background for seamless full-screen */
-    --pad-off: #333;
-    --pad-on: #00ff88;
+    --soil-color: #5d4037;
+    --soil-active: #795548;
     --accent: #00ff88;
-    --text-color: #e0e0e0;
-    --playhead-highlight: rgba(255, 255, 255, 0.4);
+    --glow: #00ff88;
+    --text-color: #ffffff;
+    --shelf-bg: rgba(62, 39, 35, 0.9);
 }
 
 * {
@@ -15,81 +14,87 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-image: url('assets/image/garden_bg.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
     color: var(--text-color);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Fredoka', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden; /* Prevent scrolling on full-screen */
+    overflow: hidden;
 }
 
 .container {
-    background-color: var(--container-bg);
-    padding: 4vw; /* Responsive padding */
     display: flex;
     flex-direction: column;
     height: 100vh;
     width: 100vw;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 10px;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     flex-shrink: 0;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
 }
 
 h1 {
     font-size: clamp(1.2rem, 3vw, 2rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .controls {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: center;
 }
 
 .btn {
-    background-color: var(--accent);
-    color: #000;
-    border: none;
-    padding: 0.8rem 1.6rem;
-    border-radius: 8px;
+    background-color: #ff9800;
+    color: white;
+    border: 3px solid #e65100;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
     font-weight: 700;
-    font-size: 1rem;
     cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
+    transition: all 0.1s;
 }
 
 .btn:hover {
-    opacity: 0.9;
-}
-
-.btn:active {
-    transform: scale(0.95);
+    background-color: #f57c00;
+    transform: translateY(-2px);
 }
 
 .bpm-control {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    font-weight: 600;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
 }
 
 input[type="number"] {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    color: var(--text-color);
-    padding: 0.6rem;
-    border-radius: 6px;
-    width: 80px;
-    font-size: 1.1rem;
+    background: #fff;
+    border: none;
+    padding: 0.2rem;
+    border-radius: 5px;
+    width: 60px;
     text-align: center;
+    font-family: inherit;
+    font-weight: 700;
 }
 
 main {
@@ -97,62 +102,197 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0; /* Important for flex-shrink */
+    perspective: 1200px;
+    padding: 2vh 10vw;
 }
 
 .grid-container {
     display: flex;
     flex-direction: column;
     gap: 1.5vh;
-    height: 100%;
-    margin-bottom: 1rem;
+    transform: rotateX(45deg);
+    /* Removed preserve-3d to fix drag-drop hitbox targeting */
+    height: 80%;
+    width: 100%;
+    padding-left: 12%;
+    padding-right: 12%;
 }
 
 .lane-row {
     display: grid;
-    gap: 10px;
-    height: 100%;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 8px;
+    flex: 1;
+    transform: translateZ(0);
+    /* Create separate layer for clean rendering */
 }
 
-/* Individual lane column counts */
-.lane-row-0 { grid-template-columns: repeat(4, 1fr); }
-.lane-row-1 { grid-template-columns: repeat(8, 1fr); }
-.lane-row-2 { grid-template-columns: repeat(16, 1fr); }
+.lane-row-0 .pad {
+    grid-column: span 4;
+}
+
+.lane-row-1 .pad {
+    grid-column: span 2;
+}
+
+.lane-row-2 .pad {
+    grid-column: span 1;
+}
 
 .pad {
     width: 100%;
     height: 100%;
-    background-color: var(--pad-off);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.1s, box-shadow 0.1s, transform 0.05s;
-    min-height: 60px;
+    background-color: var(--soil-color);
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5),
+        0 0 10px rgba(46, 125, 50, 0.6);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.pad:hover {
-    background-color: #444;
+.pad.drag-over {
+    background-color: #8d6e63;
+    border-color: var(--accent);
 }
 
-.pad:active {
-    transform: scale(0.96);
+/* Plant styling */
+.plant {
+    width: 80%;
+    height: 80%;
+    position: relative;
+    pointer-events: none;
+    animation: grow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.pad.active {
-    background-color: var(--pad-on);
-    box-shadow: 0 0 20px var(--pad-on);
+.fruit-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-/* Playhead highlight */
+@keyframes grow {
+    from {
+        transform: scale(0) translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Playhead */
 .playing {
-    outline: 2px solid white;
-    box-shadow: inset 0 0 15px white;
+    box-shadow: 0 0 20px #fff, inset 0 0 10px #fff;
+    border-color: #fff;
     z-index: 10;
 }
 
-footer {
-    text-align: center;
-    padding: 1rem 0;
-    color: #555;
+/* Gameplay Footer */
+.game-footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 20px;
+    background: var(--shelf-bg);
+    border-top: 4px solid #5d4037;
+    border-radius: 20px 20px 0 0;
+    height: 15vh;
+}
+
+.basket-container,
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    flex: 1;
+}
+
+/* The seed icon */
+.seed {
+    width: clamp(60px, 8vh, 100px);
+    height: clamp(60px, 8vh, 100px);
+    cursor: grab;
+    transition: transform 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.seed:active {
+    cursor: grabbing;
+}
+
+.seed:hover {
+    transform: scale(1.1);
+}
+
+.seed-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.inventory-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.seed-count {
+    background: #ffc107;
+    color: #3e2723;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 800;
     font-size: 0.9rem;
-    flex-shrink: 0;
+    margin-bottom: 2px;
+}
+
+.lane-label-game {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffcc80;
+    text-transform: uppercase;
+}
+
+/* Shovel Tool */
+.tool {
+    width: clamp(60px, 8vh, 100px);
+    height: clamp(60px, 8vh, 100px);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tool.active {
+    background: #ff5252;
+    box-shadow: 0 0 15px #ff5252;
+    transform: scale(1.1);
+}
+
+.shovel-img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* Delete Mode Cursor */
+body.delete-mode,
+body.delete-mode .btn,
+body.delete-mode .pad,
+body.delete-mode .seed,
+body.delete-mode .tool,
+body.delete-mode input {
+    cursor: url('assets/image/shovel_small.png') 32 32, auto !important;
 }
