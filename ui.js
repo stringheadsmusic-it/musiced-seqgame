@@ -15,6 +15,7 @@ import {
 const gridContainer = document.getElementById('sequencer-grid');
 const playBtn = document.getElementById('play-btn');
 const bpmInput = document.getElementById('bpm');
+const bpmSlider = document.getElementById('bpm-slider');
 const shovelTool = document.getElementById('shovel-tool');
 
 const lanes = ['Kick', 'Snare', 'Hi-Hat'];
@@ -191,8 +192,19 @@ playBtn.addEventListener('click', () => {
 });
 
 // BPM Event
-bpmInput.addEventListener('change', (e) => {
-    setBPM(parseInt(e.target.value));
+bpmInput.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    console.log(`UI: numeric input changed to ${val}`);
+    if (isNaN(val)) return;
+    setBPM(val);
+    bpmSlider.value = val;
+});
+
+bpmSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    console.log(`UI: slider changed to ${val}`);
+    setBPM(val);
+    bpmInput.value = val;
 });
 
 // Visual Playhead Sync

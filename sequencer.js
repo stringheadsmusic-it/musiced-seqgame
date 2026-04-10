@@ -25,6 +25,7 @@ let snareBuffer = null;
 let hatBuffer = null;
 
 export const setBPM = (newBpm) => {
+    console.log(`Sequencer: setting BPM to ${newBpm}`);
     bpm = newBpm;
 };
 

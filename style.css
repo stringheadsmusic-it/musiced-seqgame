@@ -97,6 +97,44 @@ input[type="number"] {
     font-weight: 700;
 }
 
+/* Range Slider Styling */
+#bpm-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+#bpm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #ff9800;
+    border: 2px solid #e65100;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s;
+}
+
+#bpm-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#bpm-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #ff9800;
+    border: 2px solid #e65100;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
 main {
     flex-grow: 1;
     display: flex;
@@ -291,7 +329,6 @@ main {
 body.delete-mode,
 body.delete-mode .btn,
 body.delete-mode .pad,
-body.delete-mode .seed,
 body.delete-mode .tool,
 body.delete-mode input {
     cursor: url('assets/image/shovel_small.png') 32 32, auto !important;

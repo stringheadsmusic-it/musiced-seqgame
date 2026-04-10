@@ -18,6 +18,7 @@
             <div class="controls">
                 <div class="bpm-control">
                     <span>BPM</span>
+                    <input type="range" id="bpm-slider" min="60" max="240" step="1" value="120">
                     <input type="number" id="bpm" value="120" min="60" max="240">
                 </div>
                 <button id="play-btn" class="btn">Start</button>
@@ -33,7 +34,7 @@
         <footer class="game-footer">
             <div class="basket-container" data-lane="0">
                 <div class="seed" draggable="true" data-lane="0">
-                    <img src="assets/image/seed.png" class="seed-img" alt="Tomato Seed">
+                    <img src="assets/image/tomato_seed.png" class="seed-img" alt="Tomato Seed">
                 </div>
                 <div class="inventory-info">
                     <span class="seed-count" id="count-0">4</span>
@@ -43,7 +44,7 @@
 
             <div class="basket-container" data-lane="1">
                 <div class="seed" draggable="true" data-lane="1">
-                    <img src="assets/image/seed.png" class="seed-img" alt="Corn Seed">
+                    <img src="assets/image/corn_seed.png" class="seed-img" alt="Corn Seed">
                 </div>
                 <div class="inventory-info">
                     <span class="seed-count" id="count-1">8</span>
@@ -53,7 +54,7 @@
 
             <div class="basket-container" data-lane="2">
                 <div class="seed" draggable="true" data-lane="2">
-                    <img src="assets/image/seed.png" class="seed-img" alt="Carrot Seed">
+                    <img src="assets/image/carrot_seed.png" class="seed-img" alt="Carrot Seed">
                 </div>
                 <div class="inventory-info">
                     <span class="seed-count" id="count-2">16</span>
