@@ -1,0 +1,158 @@
+:root {
+    --bg-color: #121212;
+    --container-bg: #121212; /* Match background for seamless full-screen */
+    --pad-off: #333;
+    --pad-on: #00ff88;
+    --accent: #00ff88;
+    --text-color: #e0e0e0;
+    --playhead-highlight: rgba(255, 255, 255, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Prevent scrolling on full-screen */
+}
+
+.container {
+    background-color: var(--container-bg);
+    padding: 4vw; /* Responsive padding */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+h1 {
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.controls {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.btn {
+    background-color: var(--accent);
+    color: #000;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.bpm-control {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 600;
+}
+
+input[type="number"] {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: var(--text-color);
+    padding: 0.6rem;
+    border-radius: 6px;
+    width: 80px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0; /* Important for flex-shrink */
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    height: 100%;
+    margin-bottom: 1rem;
+}
+
+.lane-row {
+    display: grid;
+    gap: 10px;
+    height: 100%;
+}
+
+/* Individual lane column counts */
+.lane-row-0 { grid-template-columns: repeat(4, 1fr); }
+.lane-row-1 { grid-template-columns: repeat(8, 1fr); }
+.lane-row-2 { grid-template-columns: repeat(16, 1fr); }
+
+.pad {
+    width: 100%;
+    height: 100%;
+    background-color: var(--pad-off);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.05s;
+    min-height: 60px;
+}
+
+.pad:hover {
+    background-color: #444;
+}
+
+.pad:active {
+    transform: scale(0.96);
+}
+
+.pad.active {
+    background-color: var(--pad-on);
+    box-shadow: 0 0 20px var(--pad-on);
+}
+
+/* Playhead highlight */
+.playing {
+    outline: 2px solid white;
+    box-shadow: inset 0 0 15px white;
+    z-index: 10;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
