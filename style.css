@@ -163,6 +163,13 @@ main {
     flex: 1;
     transform: translateZ(0);
     /* Create separate layer for clean rendering */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lane-row.inactive {
+    opacity: 0.25;
+    filter: blur(1.5px) grayscale(0.3);
+    pointer-events: none;
 }
 
 .lane-row-0 .pad {

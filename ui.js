@@ -160,6 +160,14 @@ document.querySelectorAll('.seed').forEach(seed => {
     seed.addEventListener('dragstart', (e) => {
         draggedLane = e.target.closest('.seed').dataset.lane;
         e.dataTransfer.setData('text/plain', draggedLane);
+
+        // Visual feedback: Dim irrelevant lanes
+        document.querySelectorAll('.lane-row').forEach((row, index) => {
+            if (index != draggedLane) {
+                row.classList.add('inactive');
+            }
+        });
+
         // Subtle delay to hide original while dragging
         setTimeout(() => e.target.style.visibility = 'hidden', 0);
     });
@@ -167,7 +175,20 @@ document.querySelectorAll('.seed').forEach(seed => {
     seed.addEventListener('dragend', (e) => {
         e.target.style.visibility = 'visible';
         draggedLane = null;
+
+        // Restore all lanes
+        document.querySelectorAll('.lane-row').forEach(row => {
+            row.classList.remove('inactive');
+        });
     });
+});
+
+/**
+ * Global Context Menu Prevention for Footer
+ * Prevents interference during dragging and interaction
+ */
+document.querySelector('.game-footer').addEventListener('contextmenu', (e) => {
+    e.preventDefault();
 });
 
 /**
