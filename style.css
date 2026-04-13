@@ -35,13 +35,13 @@ body {
     width: 100vw;
     background: rgba(0, 0, 0, 0.1);
     padding: 10px;
+    overflow: hidden;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
     flex-shrink: 0;
     padding: 10px 20px;
     background: rgba(0, 0, 0, 0.3);
@@ -136,24 +136,26 @@ input[type="number"] {
 }
 
 main {
-    flex-grow: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     perspective: 1200px;
-    padding: 2vh 10vw;
+    padding: 1vh 10vw;
+    min-height: 0;
 }
 
 .grid-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5vh;
+    gap: 1.2vh;
     transform: rotateX(45deg);
     /* Removed preserve-3d to fix drag-drop hitbox targeting */
-    height: 80%;
+    height: 90%;
     width: 100%;
-    padding-left: 12%;
-    padding-right: 12%;
+    padding-left: 14%;
+    padding-right: 14%;
+    padding-top: 8%;
 }
 
 .lane-row {
@@ -242,11 +244,13 @@ main {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 10px 20px;
+    padding: 1vh 2vw;
     background: var(--shelf-bg);
     border-top: 4px solid #5d4037;
     border-radius: 20px 20px 0 0;
-    height: 15vh;
+    flex-shrink: 0;
+    height: 18vh;
+    gap: 10px;
 }
 
 .basket-container,
@@ -261,8 +265,8 @@ main {
 
 /* The seed icon */
 .seed {
-    width: clamp(60px, 8vh, 100px);
-    height: clamp(60px, 8vh, 100px);
+    width: clamp(50px, 9vh, 100px);
+    height: clamp(50px, 9vh, 100px);
     cursor: grab;
     transition: transform 0.2s;
     display: flex;
@@ -309,8 +313,8 @@ main {
 
 /* Shovel Tool */
 .tool {
-    width: clamp(60px, 8vh, 100px);
-    height: clamp(60px, 8vh, 100px);
+    width: clamp(50px, 9vh, 100px);
+    height: clamp(50px, 9vh, 100px);
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     display: flex;
@@ -339,4 +343,57 @@ body.delete-mode .pad,
 body.delete-mode .tool,
 body.delete-mode input {
     cursor: url('assets/image/shovel_small.png') 32 32, auto !important;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 600px) {
+    .container {
+        padding: 5px;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .controls {
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .bpm-control {
+        flex-grow: 1;
+        justify-content: center;
+    }
+
+    main {
+        padding: 1vh 2vw;
+    }
+
+    .grid-container {
+        padding-left: 16%;
+        padding-right: 16%;
+        gap: 0.5vh;
+    }
+
+    .game-footer {
+        padding: 10px 5px;
+        min-height: 20vh;
+    }
+
+    .lane-row {
+        gap: 2px;
+    }
+
+    .lane-label-game {
+        font-size: 0.65rem;
+    }
+
+    .seed-count {
+        font-size: 0.75rem;
+        padding: 1px 6px;
+    }
 }
