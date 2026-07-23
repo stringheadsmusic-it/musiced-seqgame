@@ -28,6 +28,7 @@ const fruitAssets = [
 let inventory = [4, 8, 16];
 let isDeleteMode = false;
 let draggedLane = null;
+let dragGhost = null;
 
 /**
  * Initializes the grid UI
@@ -45,26 +46,6 @@ function initGrid() {
             pad.className = 'pad';
             pad.dataset.lane = laneIndex;
             pad.dataset.step = step;
-
-            // Drag and Drop Listeners
-            pad.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                if (draggedLane == laneIndex && !pad.querySelector('.plant')) {
-                    pad.classList.add('drag-over');
-                }
-            });
-
-            pad.addEventListener('dragleave', () => {
-                pad.classList.remove('drag-over');
-            });
-
-            pad.addEventListener('drop', (e) => {
-                e.preventDefault();
-                pad.classList.remove('drag-over');
-                if (draggedLane == laneIndex && !pad.querySelector('.plant') && inventory[laneIndex] > 0) {
-                    plantSeed(pad, laneIndex, step);
-                }
-            });
 
             // Click listener for Shovel (Delete Mode)
             pad.addEventListener('click', () => {
@@ -154,32 +135,106 @@ shovelTool.addEventListener('click', () => {
 });
 
 /**
- * Global Drag Events for Seeds
+ * Global Pointer Dragging handlers for Seeds
  */
-document.querySelectorAll('.seed').forEach(seed => {
-    seed.addEventListener('dragstart', (e) => {
-        draggedLane = e.target.closest('.seed').dataset.lane;
-        e.dataTransfer.setData('text/plain', draggedLane);
+function onPointerMove(e) {
+    if (!dragGhost) return;
+    
+    // Update ghost position
+    dragGhost.style.left = `${e.clientX}px`;
+    dragGhost.style.top = `${e.clientY}px`;
 
-        // Visual feedback: Dim irrelevant lanes
+    // Perform hit testing to find pad
+    // Since dragGhost has pointer-events: none, elementFromPoint skips it
+    const element = document.elementFromPoint(e.clientX, e.clientY);
+    const pad = element ? element.closest('.pad') : null;
+
+    // Clear previous drag-over states
+    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+
+    if (pad) {
+        const padLane = parseInt(pad.dataset.lane);
+        // Highlight only if it matches lane, is empty, and belongs to correct lane
+        if (padLane === draggedLane && !pad.querySelector('.plant')) {
+            pad.classList.add('drag-over');
+        }
+    }
+}
+
+function onPointerUp(e) {
+    if (dragGhost) {
+        document.body.removeChild(dragGhost);
+        dragGhost = null;
+    }
+
+    // Determine target pad
+    const element = document.elementFromPoint(e.clientX, e.clientY);
+    const pad = element ? element.closest('.pad') : null;
+
+    if (pad) {
+        const padLane = parseInt(pad.dataset.lane);
+        const padStep = parseInt(pad.dataset.step);
+        if (padLane === draggedLane && !pad.querySelector('.plant') && inventory[draggedLane] > 0) {
+            plantSeed(pad, draggedLane, padStep);
+        }
+    }
+
+    // Restore UI states
+    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+    document.querySelectorAll('.lane-row').forEach(row => row.classList.remove('inactive'));
+    document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
+
+    draggedLane = null;
+
+    // Remove tracking listeners
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+}
+
+document.querySelectorAll('.seed').forEach(seed => {
+    // Disable browser native image dragging
+    seed.addEventListener('dragstart', (e) => e.preventDefault());
+
+    seed.addEventListener('pointerdown', (e) => {
+        // Only left-click / primary touch pointer
+        if (e.button !== 0) return;
+        
+        const seedContainer = e.target.closest('.seed');
+        if (!seedContainer) return;
+        
+        const laneVal = parseInt(seedContainer.dataset.lane);
+        if (isNaN(laneVal) || inventory[laneVal] <= 0) {
+            return;
+        }
+
+        draggedLane = laneVal;
+
+        // Prevent default touch scrolling/actions
+        e.preventDefault();
+
+        // Create visual ghost
+        const seedImg = seedContainer.querySelector('.seed-img');
+        dragGhost = document.createElement('img');
+        dragGhost.src = seedImg.src;
+        dragGhost.className = 'drag-ghost';
+        // Position at pointer coordinates initially
+        dragGhost.style.left = `${e.clientX}px`;
+        dragGhost.style.top = `${e.clientY}px`;
+        document.body.appendChild(dragGhost);
+
+        // Hide the original seed container during drag
+        seedContainer.style.opacity = '0.3';
+
+        // Dim inactive lanes
         document.querySelectorAll('.lane-row').forEach((row, index) => {
-            if (index != draggedLane) {
+            if (index !== draggedLane) {
                 row.classList.add('inactive');
             }
         });
 
-        // Subtle delay to hide original while dragging
-        setTimeout(() => e.target.style.visibility = 'hidden', 0);
-    });
-
-    seed.addEventListener('dragend', (e) => {
-        e.target.style.visibility = 'visible';
-        draggedLane = null;
-
-        // Restore all lanes
-        document.querySelectorAll('.lane-row').forEach(row => {
-            row.classList.remove('inactive');
-        });
+        // Set up tracking listeners
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
     });
 });
 
