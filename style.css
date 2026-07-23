@@ -33,7 +33,7 @@ body {
     flex-direction: column;
     height: 86vh; /* Fits the game frame safely within the screen's vertical safe area */
     width: 96vw;  /* Fits the game frame safely within the screen's horizontal safe area */
-    background: rgba(0, 0, 0, 0.1);
+    background: transparent; /* Fully invisible container background */
     padding: 10px;
     overflow: hidden;
 }
