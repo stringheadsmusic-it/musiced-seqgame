@@ -30,6 +30,8 @@ let isDeleteMode = false;
 let draggedLane = null;
 let dragGhost = null;
 let activePointerId = null;
+let cachedPads = [];
+let currentHoveredPad = null;
 
 /**
  * Initializes the grid UI
@@ -142,23 +144,33 @@ function onPointerMove(e) {
     if (e.pointerId !== activePointerId) return;
     if (!dragGhost) return;
     
-    // Update ghost position
-    dragGhost.style.left = `${e.clientX}px`;
-    dragGhost.style.top = `${e.clientY}px`;
+    // Update ghost position using GPU-composited 3D transforms for butter-smooth movement
+    dragGhost.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
 
-    // Perform hit testing to find pad
-    // Since dragGhost has pointer-events: none, elementFromPoint skips it
-    const element = document.elementFromPoint(e.clientX, e.clientY);
-    const pad = element ? element.closest('.pad') : null;
+    const x = e.clientX;
+    const y = e.clientY;
 
-    // Clear previous drag-over states
-    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+    let foundPad = null;
+    for (let i = 0; i < cachedPads.length; i++) {
+        const pad = cachedPads[i];
+        if (x >= pad.left && x <= pad.right && y >= pad.top && y <= pad.bottom) {
+            foundPad = pad;
+            break;
+        }
+    }
 
-    if (pad) {
-        const padLane = parseInt(pad.dataset.lane);
-        // Highlight only if it matches lane, is empty, and belongs to correct lane
-        if (padLane === draggedLane && !pad.querySelector('.plant')) {
-            pad.classList.add('drag-over');
+    if (foundPad) {
+        if (currentHoveredPad !== foundPad.element) {
+            if (currentHoveredPad) {
+                currentHoveredPad.classList.remove('drag-over');
+            }
+            currentHoveredPad = foundPad.element;
+            currentHoveredPad.classList.add('drag-over');
+        }
+    } else {
+        if (currentHoveredPad) {
+            currentHoveredPad.classList.remove('drag-over');
+            currentHoveredPad = null;
         }
     }
 }
@@ -171,25 +183,33 @@ function onPointerUp(e) {
         dragGhost = null;
     }
 
-    // Determine target pad
-    const element = document.elementFromPoint(e.clientX, e.clientY);
-    const pad = element ? element.closest('.pad') : null;
+    const x = e.clientX;
+    const y = e.clientY;
 
-    if (pad) {
-        const padLane = parseInt(pad.dataset.lane);
-        const padStep = parseInt(pad.dataset.step);
-        if (padLane === draggedLane && !pad.querySelector('.plant') && inventory[draggedLane] > 0) {
-            plantSeed(pad, draggedLane, padStep);
+    let foundPad = null;
+    for (let i = 0; i < cachedPads.length; i++) {
+        const pad = cachedPads[i];
+        if (x >= pad.left && x <= pad.right && y >= pad.top && y <= pad.bottom) {
+            foundPad = pad;
+            break;
         }
     }
 
+    if (foundPad && inventory[draggedLane] > 0) {
+        plantSeed(foundPad.element, draggedLane, foundPad.step);
+    }
+
     // Restore UI states
-    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+    if (currentHoveredPad) {
+        currentHoveredPad.classList.remove('drag-over');
+    }
     document.querySelectorAll('.lane-row').forEach(row => row.classList.remove('inactive'));
     document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
 
     draggedLane = null;
     activePointerId = null;
+    cachedPads = [];
+    currentHoveredPad = null;
 
     // Remove tracking listeners
     window.removeEventListener('pointermove', onPointerMove);
@@ -206,12 +226,16 @@ function onPointerCancel(e) {
     }
 
     // Restore UI states
-    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+    if (currentHoveredPad) {
+        currentHoveredPad.classList.remove('drag-over');
+    }
     document.querySelectorAll('.lane-row').forEach(row => row.classList.remove('inactive'));
     document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
 
     draggedLane = null;
     activePointerId = null;
+    cachedPads = [];
+    currentHoveredPad = null;
 
     // Remove tracking listeners
     window.removeEventListener('pointermove', onPointerMove);
@@ -244,14 +268,30 @@ document.querySelectorAll('.seed').forEach(seed => {
         // Prevent default touch scrolling/actions
         e.preventDefault();
 
+        // Cache pads for the active lane to avoid layout thrashing during dragging
+        cachedPads = [];
+        currentHoveredPad = null;
+        document.querySelectorAll(`.pad[data-lane="${draggedLane}"]`).forEach(pad => {
+            const rect = pad.getBoundingClientRect();
+            if (!pad.querySelector('.plant')) {
+                cachedPads.push({
+                    element: pad,
+                    left: rect.left,
+                    right: rect.right,
+                    top: rect.top,
+                    bottom: rect.bottom,
+                    step: parseInt(pad.dataset.step)
+                });
+            }
+        });
+
         // Create visual ghost
         const seedImg = seedContainer.querySelector('.seed-img');
         dragGhost = document.createElement('img');
         dragGhost.src = seedImg.src;
         dragGhost.className = 'drag-ghost';
-        // Position at pointer coordinates initially
-        dragGhost.style.left = `${e.clientX}px`;
-        dragGhost.style.top = `${e.clientY}px`;
+        // Position at pointer coordinates initially via hardware-accelerated transform
+        dragGhost.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
         document.body.appendChild(dragGhost);
 
         // Hide the original seed container during drag

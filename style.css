@@ -402,11 +402,13 @@ body.delete-mode input {
 /* Floating Pointer Drag Ghost */
 .drag-ghost {
     position: fixed;
+    top: 0;
+    left: 0;
     pointer-events: none; /* Crucial for elementFromPoint to hit targets underneath */
     z-index: 10000;
-    transform: translate(-50%, -50%);
     opacity: 0.8;
     width: clamp(50px, 9vh, 100px);
     height: clamp(50px, 9vh, 100px);
     object-fit: contain;
+    will-change: transform; /* hardware acceleration hint */
 }
