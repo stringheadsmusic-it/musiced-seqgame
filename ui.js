@@ -189,6 +189,26 @@ function onPointerUp(e) {
     // Remove tracking listeners
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerCancel);
+}
+
+function onPointerCancel(e) {
+    if (dragGhost) {
+        document.body.removeChild(dragGhost);
+        dragGhost = null;
+    }
+
+    // Restore UI states
+    document.querySelectorAll('.pad').forEach(p => p.classList.remove('drag-over'));
+    document.querySelectorAll('.lane-row').forEach(row => row.classList.remove('inactive'));
+    document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
+
+    draggedLane = null;
+
+    // Remove tracking listeners
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerCancel);
 }
 
 document.querySelectorAll('.seed').forEach(seed => {
@@ -196,8 +216,8 @@ document.querySelectorAll('.seed').forEach(seed => {
     seed.addEventListener('dragstart', (e) => e.preventDefault());
 
     seed.addEventListener('pointerdown', (e) => {
-        // Only left-click / primary touch pointer
-        if (e.button !== 0) return;
+        // Only left-click for mouse, bypass for touch events
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
         
         const seedContainer = e.target.closest('.seed');
         if (!seedContainer) return;
@@ -235,6 +255,7 @@ document.querySelectorAll('.seed').forEach(seed => {
         // Set up tracking listeners
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerCancel);
     });
 });
 

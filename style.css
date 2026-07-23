@@ -276,6 +276,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
+    touch-action: none; /* Prevents touch gesture/scroll cancellation during dragging */
 }
 
 .seed:active {
