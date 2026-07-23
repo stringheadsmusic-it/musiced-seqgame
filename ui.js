@@ -29,6 +29,7 @@ let inventory = [4, 8, 16];
 let isDeleteMode = false;
 let draggedLane = null;
 let dragGhost = null;
+let activePointerId = null;
 
 /**
  * Initializes the grid UI
@@ -138,6 +139,7 @@ shovelTool.addEventListener('click', () => {
  * Global Pointer Dragging handlers for Seeds
  */
 function onPointerMove(e) {
+    if (e.pointerId !== activePointerId) return;
     if (!dragGhost) return;
     
     // Update ghost position
@@ -162,6 +164,8 @@ function onPointerMove(e) {
 }
 
 function onPointerUp(e) {
+    if (e.pointerId !== activePointerId) return;
+
     if (dragGhost) {
         document.body.removeChild(dragGhost);
         dragGhost = null;
@@ -185,6 +189,7 @@ function onPointerUp(e) {
     document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
 
     draggedLane = null;
+    activePointerId = null;
 
     // Remove tracking listeners
     window.removeEventListener('pointermove', onPointerMove);
@@ -193,6 +198,8 @@ function onPointerUp(e) {
 }
 
 function onPointerCancel(e) {
+    if (e.pointerId !== activePointerId) return;
+
     if (dragGhost) {
         document.body.removeChild(dragGhost);
         dragGhost = null;
@@ -204,6 +211,7 @@ function onPointerCancel(e) {
     document.querySelectorAll('.seed').forEach(s => s.style.opacity = '1');
 
     draggedLane = null;
+    activePointerId = null;
 
     // Remove tracking listeners
     window.removeEventListener('pointermove', onPointerMove);
@@ -219,6 +227,9 @@ document.querySelectorAll('.seed').forEach(seed => {
         // Only left-click for mouse, bypass for touch events
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         
+        // Ignore additional touches if a drag is already active
+        if (activePointerId !== null) return;
+        
         const seedContainer = e.target.closest('.seed');
         if (!seedContainer) return;
         
@@ -227,6 +238,7 @@ document.querySelectorAll('.seed').forEach(seed => {
             return;
         }
 
+        activePointerId = e.pointerId;
         draggedLane = laneVal;
 
         // Prevent default touch scrolling/actions
