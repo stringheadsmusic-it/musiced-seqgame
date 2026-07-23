@@ -17,6 +17,8 @@ const playBtn = document.getElementById('play-btn');
 const bpmInput = document.getElementById('bpm');
 const bpmSlider = document.getElementById('bpm-slider');
 const shovelTool = document.getElementById('shovel-tool');
+const layoutToggle = document.getElementById('layout-toggle');
+const containerEl = document.querySelector('.container');
 
 const lanes = ['Kick', 'Snare', 'Hi-Hat'];
 const fruitAssets = [
@@ -300,8 +302,35 @@ window.addEventListener('step-triggered', (e) => {
     });
 });
 
+// Smartboard Mode Toggle & Touch Detection
+const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+let isSmartboardMode = localStorage.getItem('smartboardMode') !== null 
+    ? localStorage.getItem('smartboardMode') === 'true' 
+    : hasTouch;
+
+function updateLayoutUI() {
+    if (isSmartboardMode) {
+        containerEl.classList.add('smartboard-layout');
+        layoutToggle.textContent = 'Smartboard Mode: ON';
+        layoutToggle.style.backgroundColor = '#4caf50';
+        layoutToggle.style.borderColor = '#388e3c';
+    } else {
+        containerEl.classList.remove('smartboard-layout');
+        layoutToggle.textContent = 'Smartboard Mode: OFF';
+        layoutToggle.style.backgroundColor = '#757575';
+        layoutToggle.style.borderColor = '#616161';
+    }
+}
+
+layoutToggle.addEventListener('click', () => {
+    isSmartboardMode = !isSmartboardMode;
+    localStorage.setItem('smartboardMode', isSmartboardMode);
+    updateLayoutUI();
+});
+
 // Start initialization
 initGrid();
 updateInventoryUI();
 updatePlayButton();
+updateLayoutUI();
 console.log('Gardening UI Initialized');

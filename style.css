@@ -34,8 +34,13 @@ body {
     height: 100vh;
     width: 100vw;
     background: rgba(0, 0, 0, 0.1);
-    padding: 10px 10px 8vh 10px; /* 8vh bottom padding to clear smartboard navigation overlays */
+    padding: 10px 10px 2vh 10px; /* Default desktop padding (clean, compact) */
     overflow: hidden;
+    transition: padding-bottom 0.3s ease-out; /* Smooth layout transition */
+}
+
+.container.smartboard-layout {
+    padding-bottom: 14vh; /* Lifts layout by 14vh to clear smartboard navigation overlays */
 }
 
 header {
