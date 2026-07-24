@@ -31,8 +31,8 @@ body {
 .container {
     display: flex;
     flex-direction: column;
-    height: 86vh; /* Fits the game frame safely within the screen's vertical safe area */
-    width: 96vw;  /* Fits the game frame safely within the screen's horizontal safe area */
+    height: 100vh;
+    width: 100vw;
     background: transparent; /* Fully invisible container background */
     padding: 10px;
     overflow: hidden;
@@ -350,6 +350,8 @@ body.delete-mode input {
 /* Smartboard / Large touchscreen displays */
 @media (min-width: 1025px) and (pointer: coarse) {
     .container {
+        height: 86vh; /* Safe scale-down to clear top/bottom overlays */
+        width: 96vw;  /* Safe scale-down to clear side bezels */
         padding-bottom: 120px; /* Safe padding to lift footer elements above overlays */
     }
 }
