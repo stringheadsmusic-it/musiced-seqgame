@@ -225,8 +225,9 @@ main {
 }
 
 .tomato-fruit-img {
-    width: 60%; /* Reduced size specifically for tomatoes */
-    height: 60%;
+    width: 78%;
+    /* Reduced size specifically for tomatoes */
+    height: 100%;
 }
 
 @keyframes grow {
