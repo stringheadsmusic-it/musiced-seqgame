@@ -352,7 +352,7 @@ body.delete-mode input {
 /* Smartboard / Large touchscreen displays */
 @media (min-width: 1025px) and (pointer: coarse) {
     .container {
-        height: 86vh;
+        height: 96vh;
         /* Safe scale-down to clear top/bottom overlays */
         width: 96vw;
         /* Safe scale-down to clear side bezels */
