@@ -78,6 +78,9 @@ function plantSeed(pad, laneIndex, step) {
     const img = document.createElement('img');
     img.src = fruitAssets[laneIndex];
     img.className = 'fruit-img';
+    if (laneIndex === 0) {
+        img.classList.add('tomato-fruit-img');
+    }
     plant.appendChild(img);
     pad.appendChild(plant);
 
