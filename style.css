@@ -33,7 +33,8 @@ body {
     flex-direction: column;
     height: 100vh;
     width: 100vw;
-    background: transparent; /* Fully invisible container background */
+    background: transparent;
+    /* Fully invisible container background */
     padding: 10px;
     overflow: hidden;
 }
@@ -272,7 +273,8 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    touch-action: none; /* Prevents touch gesture/scroll cancellation during dragging */
+    touch-action: none;
+    /* Prevents touch gesture/scroll cancellation during dragging */
 }
 
 .seed:active {
@@ -350,9 +352,12 @@ body.delete-mode input {
 /* Smartboard / Large touchscreen displays */
 @media (min-width: 1025px) and (pointer: coarse) {
     .container {
-        height: 86vh; /* Safe scale-down to clear top/bottom overlays */
-        width: 96vw;  /* Safe scale-down to clear side bezels */
-        padding-bottom: 120px; /* Safe padding to lift footer elements above overlays */
+        height: 86vh;
+        /* Safe scale-down to clear top/bottom overlays */
+        width: 96vw;
+        /* Safe scale-down to clear side bezels */
+        padding-bottom: 80px;
+        /* Safe padding to lift footer elements above overlays */
     }
 }
 
@@ -413,11 +418,13 @@ body.delete-mode input {
     position: fixed;
     top: 0;
     left: 0;
-    pointer-events: none; /* Crucial for elementFromPoint to hit targets underneath */
+    pointer-events: none;
+    /* Crucial for elementFromPoint to hit targets underneath */
     z-index: 10000;
     opacity: 0.8;
     width: clamp(50px, 9vh, 100px);
     height: clamp(50px, 9vh, 100px);
     object-fit: contain;
-    will-change: transform; /* hardware acceleration hint */
+    will-change: transform;
+    /* hardware acceleration hint */
 }
