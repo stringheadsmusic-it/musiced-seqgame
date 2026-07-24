@@ -347,6 +347,13 @@ body.delete-mode input {
 }
 
 /* Responsive Media Queries */
+/* Smartboard / Large touchscreen displays */
+@media (min-width: 1025px) and (pointer: coarse) {
+    .container {
+        padding-bottom: 120px; /* Safe padding to lift footer elements above overlays */
+    }
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 5px;
