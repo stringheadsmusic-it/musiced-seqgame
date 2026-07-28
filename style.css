@@ -241,8 +241,8 @@ main {
 
 /* Playhead */
 .playing {
-    box-shadow: 0 0 20px #fff, inset 0 0 10px #fff;
-    border-color: #fff;
+    box-shadow: 0 0 20px #fff, inset 0 0 10px #fff !important;
+    border-color: #fff !important;
     z-index: 10;
 }
 
