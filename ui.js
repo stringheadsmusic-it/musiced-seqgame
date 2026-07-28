@@ -356,7 +356,20 @@ playBtn.addEventListener('click', () => {
 
     if (getIsPlaying()) {
         stopSequencer();
+        // Clear evaluation highlights when stopped manually
+        if (getIsChallengeMode()) {
+            for (let lane = 0; lane < 3; lane++) {
+                const pads = padElements[lane];
+                for (let step = 0; step < pads.length; step++) {
+                    pads[step].classList.remove('eval-correct', 'eval-incorrect');
+                }
+            }
+        }
     } else {
+        // If starting in Challenge Mode, show evaluation highlights immediately
+        if (getIsChallengeMode()) {
+            highlightEvaluationGrid();
+        }
         startSequencer();
     }
     updatePlayButton();
