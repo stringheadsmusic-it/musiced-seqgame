@@ -39,12 +39,14 @@ let dragGhost = null;
 let activePointerId = null;
 let cachedPads = [];
 let currentHoveredPad = null;
+let padElements = [[], [], []];
 
 /**
  * Initializes the grid UI
  */
 function initGrid() {
     gridContainer.innerHTML = '';
+    padElements = [[], [], []];
 
     lanes.forEach((laneName, laneIndex) => {
         const row = document.createElement('div');
@@ -65,6 +67,7 @@ function initGrid() {
             });
 
             row.appendChild(pad);
+            padElements[laneIndex][step] = pad;
         }
         gridContainer.appendChild(row);
     });
@@ -379,14 +382,18 @@ bpmSlider.addEventListener('input', (e) => {
 window.addEventListener('step-triggered', (e) => {
     const { laneSteps } = e.detail;
 
-    // Clear previous focus
-    const allPads = document.querySelectorAll('.pad');
-    allPads.forEach(p => p.classList.remove('playing'));
+    // Clear previous focus using the cached padElements
+    for (let lane = 0; lane < 3; lane++) {
+        const pads = padElements[lane];
+        for (let step = 0; step < pads.length; step++) {
+            pads[step].classList.remove('playing');
+        }
+    }
 
     // Highlight specific pads for each lane that triggered
     laneSteps.forEach((stepIndex, laneIndex) => {
         if (stepIndex !== null) {
-            const pad = document.querySelector(`.pad[data-lane="${laneIndex}"][data-step="${stepIndex}"]`);
+            const pad = padElements[laneIndex][stepIndex];
             if (pad) pad.classList.add('playing');
         }
     });
@@ -405,14 +412,17 @@ const modalRetryBtn = document.getElementById('modal-retry-btn');
 const modalContinueBtn = document.getElementById('modal-continue-btn');
 
 function clearGarden() {
-    const pads = document.querySelectorAll('.pad');
-    pads.forEach(pad => {
-        const plant = pad.querySelector('.plant');
-        if (plant) {
-            pad.removeChild(plant);
+    for (let lane = 0; lane < 3; lane++) {
+        const pads = padElements[lane];
+        for (let step = 0; step < pads.length; step++) {
+            const pad = pads[step];
+            const plant = pad.querySelector('.plant');
+            if (plant) {
+                pad.removeChild(plant);
+            }
+            pad.classList.remove('cue');
         }
-        pad.classList.remove('cue');
-    });
+    }
     clearSequence();
 }
 
@@ -434,15 +444,18 @@ function applyChallengeCues() {
     const activeChal = getActiveChallenge();
     if (!activeChal || !getIsChallengeMode()) return;
     
-    document.querySelectorAll('.pad').forEach(pad => {
-        pad.classList.remove('cue');
-    });
+    for (let lane = 0; lane < 3; lane++) {
+        const pads = padElements[lane];
+        for (let step = 0; step < pads.length; step++) {
+            pads[step].classList.remove('cue');
+        }
+    }
     
     for (let laneIndex = 0; laneIndex < 3; laneIndex++) {
         const steps = activeChal.sequence[laneIndex];
         steps.forEach((val, stepIndex) => {
             if (val === 1) {
-                const pad = document.querySelector(`.pad[data-lane="${laneIndex}"][data-step="${stepIndex}"]`);
+                const pad = padElements[laneIndex][stepIndex];
                 if (pad) {
                     pad.classList.add('cue');
                 }

@@ -591,9 +591,28 @@ input:checked + .slider:before {
 
 /* Blinking Glow Cues on Pads */
 .pad.cue {
-    border-color: rgba(255, 235, 59, 0.4);
-    animation: padPulse 1.4s infinite ease-in-out;
+    position: relative;
     background-color: var(--soil-color);
+}
+
+/* We create a static glowing layer on ::before and only pulse its opacity (GPU-friendly) */
+.pad.cue::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    border: 2px solid rgba(255, 235, 59, 0.95);
+    box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+    pointer-events: none;
+    animation: cueGlowPulse 1.4s infinite ease-in-out;
+    will-change: opacity;
+    z-index: 2;
+}
+
+@keyframes cueGlowPulse {
+    0% { opacity: 0.25; }
+    50% { opacity: 0.95; }
+    100% { opacity: 0.25; }
 }
 
 .pad.cue::after {
@@ -607,6 +626,8 @@ input:checked + .slider:before {
     pointer-events: none;
     filter: brightness(0.7) contrast(1.2);
     animation: cueFade 1.4s infinite ease-in-out;
+    will-change: opacity;
+    z-index: 1;
 }
 
 @keyframes cueFade {
@@ -625,13 +646,13 @@ input:checked + .slider:before {
     background-image: url('assets/image/carrot.png');
 }
 
-/* Hide cue image if a plant is planted */
-.pad.cue:has(.plant)::after {
+/* Hide cue image and glow if a plant is planted */
+.pad.cue:has(.plant)::after,
+.pad.cue:has(.plant)::before {
     display: none;
 }
-/* Stop flashing animation and restore background if correctly planted */
+/* Stop flashing border and restore background if correctly planted */
 .pad.cue:has(.plant) {
-    animation: none;
     border-color: rgba(0, 0, 0, 0.3);
     background-color: var(--soil-color);
 }
@@ -642,22 +663,6 @@ body.challenge-mode-active .pad:not(.cue):not(:has(.plant)) {
     box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.8) !important; /* Flat shadow, NO green glow */
     border-color: rgba(255, 255, 255, 0.05) !important;
     opacity: 0.4;
-    filter: grayscale(0.5);
-}
-
-@keyframes padPulse {
-    0% {
-        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 235, 59, 0.2);
-        border-color: rgba(255, 235, 59, 0.4);
-    }
-    50% {
-        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 235, 59, 0.9), 0 0 8px rgba(255, 235, 59, 0.4);
-        border-color: rgba(255, 235, 59, 0.95);
-    }
-    100% {
-        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 235, 59, 0.2);
-        border-color: rgba(255, 235, 59, 0.4);
-    }
 }
 
 /* Native dialog modal styling */
