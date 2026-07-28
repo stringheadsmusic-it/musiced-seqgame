@@ -420,7 +420,7 @@ function clearGarden() {
             if (plant) {
                 pad.removeChild(plant);
             }
-            pad.classList.remove('cue');
+            pad.classList.remove('cue', 'eval-correct', 'eval-incorrect');
         }
     }
     clearSequence();
@@ -501,10 +501,47 @@ nextChallengeBtn.addEventListener('click', () => {
     loadRandomChallenge();
 });
 
+function highlightEvaluationGrid() {
+    const activeChal = getActiveChallenge();
+    if (!activeChal) return;
+    
+    for (let lane = 0; lane < 3; lane++) {
+        const pads = padElements[lane];
+        const steps = activeChal.sequence[lane];
+        
+        for (let step = 0; step < pads.length; step++) {
+            const pad = pads[step];
+            const hasPlant = pad.querySelector('.plant') !== null ? 1 : 0;
+            const target = steps[step];
+            
+            // Clear previous evaluation classes
+            pad.classList.remove('eval-correct', 'eval-incorrect');
+            
+            if (hasPlant === target) {
+                // If it matches and there is a plant, glow green
+                if (hasPlant === 1) {
+                    pad.classList.add('eval-correct');
+                }
+            } else {
+                // If it doesn't match, glow red
+                pad.classList.add('eval-incorrect');
+            }
+        }
+    }
+}
+
 // Challenge Playback Finished Event
 window.addEventListener('challenge-playback-finished', () => {
-    document.querySelectorAll('.pad').forEach(p => p.classList.remove('playing'));
+    // Clear playhead highlight from cached padElements
+    for (let lane = 0; lane < 3; lane++) {
+        const pads = padElements[lane];
+        for (let step = 0; step < pads.length; step++) {
+            pads[step].classList.remove('playing');
+        }
+    }
+    
     const result = checkSequence();
+    highlightEvaluationGrid();
     showResultsModal(result);
 });
 

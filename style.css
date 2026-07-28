@@ -665,6 +665,27 @@ body.challenge-mode-active .pad:not(.cue):not(:has(.plant)) {
     opacity: 0.4;
 }
 
+/* Evaluation visual feedback */
+.pad.eval-correct {
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.8), inset 0 0 10px rgba(0, 255, 136, 0.5) !important;
+    border-color: #00ff88 !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.pad.eval-incorrect {
+    box-shadow: 0 0 15px rgba(255, 82, 82, 0.8), inset 0 0 10px rgba(255, 82, 82, 0.5) !important;
+    border-color: #ff5252 !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+/* Hide target cue glow during evaluation to avoid yellow overlay clutter */
+.pad.eval-correct::before,
+.pad.eval-incorrect::before {
+    display: none !important;
+}
+
 /* Native dialog modal styling */
 .modal {
     border: none;

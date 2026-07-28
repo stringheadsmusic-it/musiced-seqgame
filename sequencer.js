@@ -28,6 +28,7 @@ let hatBuffer = null;
 // Challenge states
 let isChallengeMode = false;
 let activeChallenge = null;
+let challengeLoopsPlayed = 0;
 
 export const getIsChallengeMode = () => isChallengeMode;
 export const setIsChallengeMode = (val) => {
@@ -129,16 +130,19 @@ function advanceNote() {
         currentStep = 0;
         
         if (isChallengeMode) {
-            const stopTime = nextNoteTime;
-            stopSequencer();
-            
-            // Wait until the 16th step has finished playing in real-time
-            const audioCtx = getAudioContext();
-            const delayMs = (stopTime - audioCtx.currentTime) * 1000;
-            setTimeout(() => {
-                const event = new CustomEvent('challenge-playback-finished');
-                window.dispatchEvent(event);
-            }, Math.max(0, delayMs));
+            challengeLoopsPlayed++;
+            if (challengeLoopsPlayed >= 4) {
+                const stopTime = nextNoteTime;
+                stopSequencer();
+                
+                // Wait until the last step has finished playing in real-time
+                const audioCtx = getAudioContext();
+                const delayMs = (stopTime - audioCtx.currentTime) * 1000;
+                setTimeout(() => {
+                    const event = new CustomEvent('challenge-playback-finished');
+                    window.dispatchEvent(event);
+                }, Math.max(0, delayMs));
+            }
         }
     }
 }
@@ -180,6 +184,7 @@ function scheduleNote(step, time) {
 export const startSequencer = () => {
     isPlaying = true;
     currentStep = 0;
+    challengeLoopsPlayed = 0; // Reset loop counter
     const audioCtx = getAudioContext();
     nextNoteTime = audioCtx.currentTime;
     timerId = setInterval(scheduler, scheduleInterval);
