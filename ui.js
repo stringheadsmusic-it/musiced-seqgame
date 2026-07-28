@@ -9,7 +9,14 @@ import {
     stopSequencer,
     toggleStep,
     getIsPlaying,
-    setBPM
+    setBPM,
+    clearSequence,
+    getIsChallengeMode,
+    setIsChallengeMode,
+    getActiveChallenge,
+    loadChallenge,
+    loadRandomChallenge,
+    checkSequence
 } from './sequencer.js';
 
 const gridContainer = document.getElementById('sequencer-grid');
@@ -327,8 +334,17 @@ document.querySelector('.game-footer').addEventListener('contextmenu', (e) => {
  */
 function updatePlayButton() {
     const isPlaying = getIsPlaying();
-    playBtn.textContent = isPlaying ? 'Stop' : 'Start';
-    playBtn.style.backgroundColor = isPlaying ? '#f44336' : '#ff9800';
+    if (getIsChallengeMode()) {
+        playBtn.textContent = isPlaying ? 'Playing...' : 'Test Beat';
+        playBtn.style.backgroundColor = isPlaying ? '#00e676' : '#00ff88';
+        playBtn.style.color = '#121212';
+        playBtn.style.borderColor = '#00b35f';
+    } else {
+        playBtn.textContent = isPlaying ? 'Stop' : 'Start';
+        playBtn.style.backgroundColor = isPlaying ? '#f44336' : '#ff9800';
+        playBtn.style.color = 'white';
+        playBtn.style.borderColor = isPlaying ? '#b71c1c' : '#e65100';
+    }
 }
 
 // Play/Stop Event
@@ -374,6 +390,189 @@ window.addEventListener('step-triggered', (e) => {
             if (pad) pad.classList.add('playing');
         }
     });
+});
+
+// --- CHALLENGE MODE LOGIC ---
+
+const modeToggle = document.getElementById('mode-toggle');
+const modeFreeText = document.getElementById('mode-free');
+const modeChallengeText = document.getElementById('mode-challenge');
+const challengeCard = document.getElementById('challenge-card');
+const nextChallengeBtn = document.getElementById('next-challenge-btn');
+
+const gameModal = document.getElementById('game-modal');
+const modalRetryBtn = document.getElementById('modal-retry-btn');
+const modalContinueBtn = document.getElementById('modal-continue-btn');
+
+function clearGarden() {
+    const pads = document.querySelectorAll('.pad');
+    pads.forEach(pad => {
+        const plant = pad.querySelector('.plant');
+        if (plant) {
+            pad.removeChild(plant);
+        }
+        pad.classList.remove('cue');
+    });
+    clearSequence();
+}
+
+function updateInventoryForActiveChallenge() {
+    const activeChal = getActiveChallenge();
+    if (activeChal && getIsChallengeMode()) {
+        const counts = [0, 0, 0];
+        for (let lane = 0; lane < 3; lane++) {
+            counts[lane] = activeChal.sequence[lane].filter(v => v === 1).length;
+        }
+        inventory = counts;
+    } else {
+        inventory = [4, 8, 16]; // Free Play defaults
+    }
+    updateInventoryUI();
+}
+
+function applyChallengeCues() {
+    const activeChal = getActiveChallenge();
+    if (!activeChal || !getIsChallengeMode()) return;
+    
+    document.querySelectorAll('.pad').forEach(pad => {
+        pad.classList.remove('cue');
+    });
+    
+    for (let laneIndex = 0; laneIndex < 3; laneIndex++) {
+        const steps = activeChal.sequence[laneIndex];
+        steps.forEach((val, stepIndex) => {
+            if (val === 1) {
+                const pad = document.querySelector(`.pad[data-lane="${laneIndex}"][data-step="${stepIndex}"]`);
+                if (pad) {
+                    pad.classList.add('cue');
+                }
+            }
+        });
+    }
+}
+
+// Mode Selector Toggle
+modeToggle.addEventListener('change', (e) => {
+    const isChallenge = e.target.checked;
+    setIsChallengeMode(isChallenge);
+    document.body.classList.toggle('challenge-mode-active', isChallenge);
+    
+    if (isChallenge) {
+        modeFreeText.classList.remove('active');
+        modeChallengeText.classList.add('active');
+        challengeCard.classList.remove('hidden');
+        
+        if (getIsPlaying()) {
+            stopSequencer();
+        }
+        
+        loadRandomChallenge();
+    } else {
+        modeChallengeText.classList.remove('active');
+        modeFreeText.classList.add('active');
+        challengeCard.classList.add('hidden');
+        
+        if (getIsPlaying()) {
+            stopSequencer();
+        }
+        
+        clearGarden();
+        updateInventoryForActiveChallenge();
+    }
+    
+    updatePlayButton();
+});
+
+// Skip Button
+nextChallengeBtn.addEventListener('click', () => {
+    loadRandomChallenge();
+});
+
+// Challenge Playback Finished Event
+window.addEventListener('challenge-playback-finished', () => {
+    document.querySelectorAll('.pad').forEach(p => p.classList.remove('playing'));
+    const result = checkSequence();
+    showResultsModal(result);
+});
+
+// Challenge Loaded Event
+window.addEventListener('challenge-loaded', (e) => {
+    const { challenge } = e.detail;
+    
+    const titleEl = document.getElementById('challenge-title');
+    const descEl = document.getElementById('challenge-desc');
+    if (titleEl) titleEl.textContent = challenge.name;
+    if (descEl) descEl.textContent = challenge.description;
+    
+    bpmInput.value = challenge.bpm;
+    bpmSlider.value = challenge.bpm;
+    
+    clearGarden();
+    updateInventoryForActiveChallenge();
+    applyChallengeCues();
+});
+
+function showResultsModal(result) {
+    const modalTitle = document.getElementById('modal-title');
+    const modalStars = document.getElementById('modal-stars');
+    const modalMessage = document.getElementById('modal-message');
+    
+    // Grading scale
+    let stars = 0;
+    if (result.accuracy === 1.0) {
+        stars = 3;
+    } else if (result.accuracy >= 0.85) {
+        stars = 2;
+    } else if (result.accuracy >= 0.70) {
+        stars = 1;
+    }
+    
+    if (stars === 3) {
+        modalTitle.textContent = "Perfect Garden! 🌟";
+        modalMessage.textContent = "Amazing groove! You planted every single seed in the perfect spot.";
+        modalContinueBtn.textContent = "Next Challenge";
+    } else if (stars === 2) {
+        modalTitle.textContent = "Very Good! 🌻";
+        modalMessage.textContent = `So close! You got ${result.correctCount} out of ${result.totalCount} steps correct. Just a couple of tweaks needed for perfection.`;
+        modalContinueBtn.textContent = "Continue Anyway";
+    } else if (stars === 1) {
+        modalTitle.textContent = "Nice Effort! 🌿";
+        modalMessage.textContent = `Getting there! You got ${result.correctCount} out of ${result.totalCount} steps correct. Try adjusting your plants to match the glowing cues!`;
+        modalContinueBtn.textContent = "Continue Anyway";
+    } else {
+        modalTitle.textContent = "Try Again! 🍂";
+        modalMessage.textContent = `The beat is a bit out of sync. You got ${result.correctCount} out of ${result.totalCount} correct. Retrying will help you match the cues!`;
+        modalContinueBtn.textContent = "Skip Challenge";
+    }
+    
+    modalStars.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+        const starSpan = document.createElement('span');
+        starSpan.className = 'star';
+        starSpan.innerHTML = '&#9733;';
+        if (i <= stars) {
+            starSpan.classList.add('filled');
+        }
+        starSpan.style.animationDelay = `${(i - 1) * 150}ms`;
+        starSpan.classList.add('animate');
+        modalStars.appendChild(starSpan);
+    }
+    
+    gameModal.showModal();
+    updatePlayButton();
+}
+
+// Modal Buttons Actions
+modalRetryBtn.addEventListener('click', () => {
+    gameModal.close();
+    clearGarden();
+    updateInventoryForActiveChallenge();
+    applyChallengeCues();
+});
+
+modalContinueBtn.addEventListener('click', () => {
+    gameModal.close();
+    loadRandomChallenge();
 });
 
 // Start initialization

@@ -3,6 +3,7 @@
  */
 
 import { getAudioContext, playKick, playSnare, playHiHat, playSample } from './audio.js';
+import { challenges } from './challenges.js';
 
 // Configuration
 export const sequence = [
@@ -24,6 +25,76 @@ let kickBuffer = null;
 let snareBuffer = null;
 let hatBuffer = null;
 
+// Challenge states
+let isChallengeMode = false;
+let activeChallenge = null;
+
+export const getIsChallengeMode = () => isChallengeMode;
+export const setIsChallengeMode = (val) => {
+    isChallengeMode = val;
+};
+export const getActiveChallenge = () => activeChallenge;
+
+export const clearSequence = () => {
+    sequence[0].fill(0);
+    sequence[1].fill(0);
+    sequence[2].fill(0);
+};
+
+export const loadChallenge = (challengeId) => {
+    const chal = challenges.find(c => c.id === challengeId);
+    if (chal) {
+        activeChallenge = chal;
+        setBPM(chal.bpm);
+        clearSequence();
+        
+        // Dispatch event
+        const event = new CustomEvent('challenge-loaded', { detail: { challenge: chal } });
+        window.dispatchEvent(event);
+    }
+};
+
+export const loadRandomChallenge = () => {
+    if (challenges.length === 0) return;
+    
+    let newChal = activeChallenge;
+    if (challenges.length > 1) {
+        while (newChal === activeChallenge) {
+            const idx = Math.floor(Math.random() * challenges.length);
+            newChal = challenges[idx];
+        }
+    } else {
+        newChal = challenges[0];
+    }
+    
+    loadChallenge(newChal.id);
+};
+
+export const checkSequence = () => {
+    if (!activeChallenge) return { success: false, correctCount: 0, totalCount: 28, accuracy: 0 };
+    
+    let correctCount = 0;
+    const totalCount = 28;
+    
+    for (let i = 0; i < 4; i++) {
+        if (sequence[0][i] === activeChallenge.sequence[0][i]) correctCount++;
+    }
+    for (let i = 0; i < 8; i++) {
+        if (sequence[1][i] === activeChallenge.sequence[1][i]) correctCount++;
+    }
+    for (let i = 0; i < 16; i++) {
+        if (sequence[2][i] === activeChallenge.sequence[2][i]) correctCount++;
+    }
+    
+    const accuracy = correctCount / totalCount;
+    return {
+        success: accuracy === 1.0,
+        correctCount,
+        totalCount,
+        accuracy
+    };
+};
+
 export const setBPM = (newBpm) => {
     console.log(`Sequencer: setting BPM to ${newBpm}`);
     bpm = newBpm;
@@ -40,7 +111,7 @@ export const toggleStep = (lane, step) => {
  */
 function scheduler() {
     const audioCtx = getAudioContext();
-    while (nextNoteTime < audioCtx.currentTime + lookahead) {
+    while (isPlaying && nextNoteTime < audioCtx.currentTime + lookahead) {
         scheduleNote(currentStep, nextNoteTime);
         advanceNote();
     }
@@ -56,6 +127,19 @@ function advanceNote() {
     currentStep++;
     if (currentStep === 16) {
         currentStep = 0;
+        
+        if (isChallengeMode) {
+            const stopTime = nextNoteTime;
+            stopSequencer();
+            
+            // Wait until the 16th step has finished playing in real-time
+            const audioCtx = getAudioContext();
+            const delayMs = (stopTime - audioCtx.currentTime) * 1000;
+            setTimeout(() => {
+                const event = new CustomEvent('challenge-playback-finished');
+                window.dispatchEvent(event);
+            }, Math.max(0, delayMs));
+        }
     }
 }
 

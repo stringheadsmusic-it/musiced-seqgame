@@ -1,12 +1,26 @@
 /**
- * audio.js - Web Audio API Engine
+ * audio.js - Web Audio API Engine with Mastering Limiter
  */
 
 let audioCtx = null;
+let masterLimiter = null;
 
 export const initAudio = () => {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Create master limiter (using DynamicsCompressorNode)
+        masterLimiter = audioCtx.createDynamicsCompressor();
+        
+        // Configure DynamicsCompressorNode as a brickwall limiter
+        masterLimiter.threshold.setValueAtTime(-0.1, audioCtx.currentTime); // Limit peaks at -0.1 dB
+        masterLimiter.knee.setValueAtTime(0, audioCtx.currentTime);        // Hard knee for instant brickwall limiting
+        masterLimiter.ratio.setValueAtTime(20, audioCtx.currentTime);      // Max compression ratio acts as a limiter
+        masterLimiter.attack.setValueAtTime(0.003, audioCtx.currentTime);  // Fast attack (3ms) to suppress transients
+        masterLimiter.release.setValueAtTime(0.05, audioCtx.currentTime);  // Fast release (50ms) to prevent pumping
+        
+        // Connect the limiter to the sound card destination
+        masterLimiter.connect(audioCtx.destination);
     }
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
@@ -15,6 +29,13 @@ export const initAudio = () => {
 };
 
 export const getAudioContext = () => audioCtx;
+
+/**
+ * Returns the master limiter node if initialized, falling back to audioCtx.destination
+ */
+function getAudioDestination() {
+    return masterLimiter || audioCtx.destination;
+}
 
 /**
  * Loads a sample from a URL
@@ -33,7 +54,7 @@ export function playSample(buffer, time) {
     if (!audioCtx) return;
     const source = audioCtx.createBufferSource();
     source.buffer = buffer;
-    source.connect(audioCtx.destination);
+    source.connect(getAudioDestination());
     source.start(time);
 }
 
@@ -52,7 +73,7 @@ export function playKick(time) {
     gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(getAudioDestination());
 
     osc.start(time);
     osc.stop(time + 0.5);
@@ -84,7 +105,7 @@ export function playSnare(time) {
 
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(audioCtx.destination);
+    noiseGain.connect(getAudioDestination());
 
     noise.start(time);
     noise.stop(time + 0.2);
@@ -116,7 +137,7 @@ export function playHiHat(time) {
 
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(audioCtx.destination);
+    noiseGain.connect(getAudioDestination());
 
     noise.start(time);
     noise.stop(time + 0.05);

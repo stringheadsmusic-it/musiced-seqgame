@@ -40,8 +40,8 @@ body {
 }
 
 header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     flex-shrink: 0;
     padding: 10px 20px;
@@ -56,21 +56,16 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.controls {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-}
-
 .btn {
     background-color: #ff9800;
     color: white;
     border: 3px solid #e65100;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 2.5rem;
     border-radius: 30px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.1s;
+    justify-self: center;
 }
 
 .btn:hover {
@@ -85,6 +80,7 @@ h1 {
     background: rgba(255, 255, 255, 0.2);
     padding: 4px 12px;
     border-radius: 20px;
+    justify-self: end;
 }
 
 input[type="number"] {
@@ -144,6 +140,7 @@ main {
     perspective: 1200px;
     padding: 1vh 10vw;
     min-height: 0;
+    position: relative;
 }
 
 .grid-container {
@@ -376,20 +373,16 @@ body.delete-mode input {
     }
 
     header {
+        display: flex;
         flex-direction: column;
+        align-items: center;
         gap: 10px;
         padding: 10px;
         text-align: center;
     }
 
-    .controls {
-        gap: 10px;
-        width: 100%;
-        justify-content: center;
-    }
-
     .bpm-control {
-        flex-grow: 1;
+        width: 100%;
         justify-content: center;
     }
 
@@ -436,4 +429,348 @@ body.delete-mode input {
     object-fit: contain;
     will-change: transform;
     /* hardware acceleration hint */
+}
+
+/* --- CHALLENGE MODE & GAMIFICATION STYLES --- */
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mode-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.3s, text-shadow 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mode-text.active {
+    color: #ff9800;
+    text-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+#mode-challenge.active {
+    color: #00ff88;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+/* Switch toggle custom styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border: 1.5px solid #555;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 2.5px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #00ff88;
+    border-color: #00b35f;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+    background-color: #121212;
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Challenge card box style */
+.challenge-card {
+    position: absolute;
+    top: 1.5vh;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: rgba(62, 39, 35, 0.9);
+    border: 3px solid #5d4037;
+    border-radius: 16px;
+    padding: 12px 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    animation: slideDown 0.4s ease-out;
+    max-width: 650px;
+    width: calc(100% - 40px);
+    z-index: 100;
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.challenge-title {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: #ffc107;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.btn-skip {
+    padding: 4px 12px !important;
+    font-size: 0.75rem !important;
+    background-color: #795548 !important;
+    border: 2px solid #5d4037 !important;
+    border-radius: 15px !important;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s, transform 0.1s;
+    height: auto !important;
+}
+
+.btn-skip:hover {
+    background-color: #8d6e63 !important;
+    transform: translateY(-1px);
+}
+
+.challenge-desc {
+    font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+    color: #ffe0b2;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Blinking Glow Cues on Pads */
+.pad.cue {
+    border-color: rgba(255, 235, 59, 0.4);
+    animation: padPulse 1.4s infinite ease-in-out;
+    background-color: var(--soil-color);
+}
+
+.pad.cue::after {
+    content: '';
+    position: absolute;
+    width: 45%;
+    height: 45%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    filter: brightness(0.7) contrast(1.2);
+    animation: cueFade 1.4s infinite ease-in-out;
+}
+
+@keyframes cueFade {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.1; }
+}
+
+.pad[data-lane="0"].cue::after {
+    background-image: url('assets/image/tomato.png');
+}
+.pad[data-lane="1"].cue::after {
+    background-image: url('assets/image/corn.png');
+}
+.pad[data-lane="2"].cue::after {
+    background-image: url('assets/image/carrot.png');
+}
+
+/* Hide cue image if a plant is planted */
+.pad.cue:has(.plant)::after {
+    display: none;
+}
+/* Stop flashing animation and restore background if correctly planted */
+.pad.cue:has(.plant) {
+    animation: none;
+    border-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--soil-color);
+}
+
+/* Dim and flat styles for non-cued pads in Challenge Mode to make cued tiles pop */
+body.challenge-mode-active .pad:not(.cue):not(:has(.plant)) {
+    background-color: #261c19 !important; /* Flat dark soil color */
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.8) !important; /* Flat shadow, NO green glow */
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    opacity: 0.4;
+    filter: grayscale(0.5);
+}
+
+@keyframes padPulse {
+    0% {
+        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 235, 59, 0.2);
+        border-color: rgba(255, 235, 59, 0.4);
+    }
+    50% {
+        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 235, 59, 0.9), 0 0 8px rgba(255, 235, 59, 0.4);
+        border-color: rgba(255, 235, 59, 0.95);
+    }
+    100% {
+        box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 235, 59, 0.2);
+        border-color: rgba(255, 235, 59, 0.4);
+    }
+}
+
+/* Native dialog modal styling */
+.modal {
+    border: none;
+    border-radius: 20px;
+    background: rgba(30, 20, 15, 0.95);
+    border: 3px solid #ffc107;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 193, 7, 0.3);
+    padding: 30px;
+    max-width: 450px;
+    width: 90%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0;
+    color: #fff;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out;
+    pointer-events: none;
+}
+
+.modal[open] {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    transition: backdrop-filter 0.3s;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-content h2 {
+    font-size: 1.8rem;
+    color: #ffcc80;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    margin: 0;
+}
+
+/* Stars Rating Styling */
+.stars-container {
+    display: flex;
+    gap: 10px;
+    font-size: 3.5rem;
+    margin: 5px 0;
+    height: 4.5rem;
+    align-items: center;
+}
+
+.star {
+    color: rgba(255, 255, 255, 0.15);
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s;
+    display: inline-block;
+}
+
+.star.filled {
+    color: #ffc107;
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+}
+
+.star.animate {
+    animation: starPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards;
+}
+
+@keyframes starPop {
+    0% { transform: scale(0) rotate(-45deg); }
+    70% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+#modal-message {
+    font-size: 1rem;
+    color: #ffe0b2;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-retry {
+    background-color: #795548 !important;
+    border: 3px solid #5d4037 !important;
+}
+
+.btn-retry:hover {
+    background-color: #8d6e63 !important;
+}
+
+.btn-continue {
+    background-color: #00ff88 !important;
+    border: 3px solid #00b35f !important;
+    color: #121212 !important;
+}
+
+.btn-continue:hover {
+    background-color: #33ff9e !important;
+    transform: translateY(-2px);
 }
